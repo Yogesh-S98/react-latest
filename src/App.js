@@ -202,8 +202,6 @@ function Home() {
       <Hooks></Hooks>
       <MyContext.Provider value={'Hello, World!'}>
         {/* <div>new</div>
-        <h1>React App</h1>
-        <img src={logo} className="App-logo" alt="logo"/> */}
         <div>Open List</div>
         {/* <ListDiv></ListDiv>
         <TabView></TabView> */}
