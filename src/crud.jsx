@@ -7,15 +7,16 @@ import { createUser, deleteUser, getList, updateUser } from "./service";
 import { useLoading } from "./loader";
 import { useNotification } from "./notification";
 
-const userObj = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    isAdmin: false
-};
 
 function Crud() {
+    const userObj = {
+        id: null,
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        isAdmin: false
+    };
     const [form] = Form.useForm();
     const { showNotification } = useNotification();
     const [modal, contextHolder] = Modal.useModal();
@@ -98,7 +99,7 @@ function Crud() {
     };
     // Use useEffect to call loadList when the component mounts
     useEffect(() => {
-        form.setFieldsValue(userForm);
+        form.setFieldsValue();
         loadList();
     }, []);
     
@@ -134,12 +135,14 @@ function Crud() {
           }
     ];
 
-    const handleEdit = (row) => {
+    const handleEdit = async (row) => {
+        console.log('row', row);
         setUserModel(true);
         setTitle('Update User');
-        setUserForm(row);
+        // await form.setFieldsValue(userObj);
+        await form.setFieldsValue(row);
+        console.log('ddd', form.getFieldsValue(true));
         setErrors(userObj);
-        console.log('dsfa', row);
     };
     
     const handleDelete = async (row) => {
@@ -149,8 +152,9 @@ function Crud() {
 
     const addUser = () => {
         setTitle('Create User');
-        setErrors(userObj);
-        setUserForm(userObj);
+        form.resetFields();
+        // setErrors(userObj);
+        // setUserForm(userObj);
         setUserModel(true);
     }
 
@@ -162,27 +166,12 @@ function Crud() {
 
     const submitForm = async (e) => {
         e.preventDefault();
-        const newErrors = {};
-        if (!userForm.firstName) {
-            newErrors.firstName = 'First name is required';
-        }
-        if (!userForm.lastName) {
-            newErrors.lastName = 'Last name is required';
-        }
-        if (!userForm.phoneNumber) {
-            newErrors.phoneNumber = "Phone number is required";
-        }
-        if (!userForm.email) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(userForm.email)) {
-            newErrors.email = 'Email is invalid';
-        }
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-        } else if (userForm) {
-            setLoading(true);
-            if (userForm.id) {
-                updateUser(userForm).then((res) => {
+        try {
+            const values = await form.validateFields();
+            console.log('valid', values);
+            console.log('dddd', form.getFieldsValue(true))
+            if (form.getFieldsValue(true).id) {
+                updateUser(form.getFieldsValue(true)).then((res) => {
                     console.log('dd', res);
                     if (res) {
                         // successNotification(res?.data?.data?.message);
@@ -194,7 +183,7 @@ function Crud() {
                     }
                 })
             } else {
-                createUser(userForm).then((res) => {
+                createUser(form.getFieldsValue(true)).then((res) => {
                     console.log('ddfda', res);
                     if (res) {
                         showNotification("success", '', res.data?.message);
@@ -207,7 +196,53 @@ function Crud() {
                     }
                 })
             }
+        } catch (error) {
+            console.log('error', error);
         }
+        // const newErrors = {};
+        // if (!userForm.firstName) {
+        //     newErrors.firstName = 'First name is required';
+        // }
+        // if (!userForm.lastName) {
+        //     newErrors.lastName = 'Last name is required';
+        // }
+        // if (!userForm.phoneNumber) {
+        //     newErrors.phoneNumber = "Phone number is required";
+        // }
+        // if (!userForm.email) {
+        //     newErrors.email = 'Email is required';
+        // } else if (!/\S+@\S+\.\S+/.test(userForm.email)) {
+        //     newErrors.email = 'Email is invalid';
+        // }
+        // if (form.getFieldsError()) {
+        //     setLoading(true);
+        //     if (userForm.id) {
+        //         updateUser(form.getFieldsValue(true)).then((res) => {
+        //             console.log('dd', res);
+        //             if (res) {
+        //                 // successNotification(res?.data?.data?.message);
+        //                 showNotification("success", '', res.data?.message);
+        //                 setUserModel(false);
+        //                 setLoading(false);
+        //                 setErrors(userObj);
+        //                 loadList();
+        //             }
+        //         })
+        //     } else {
+        //         createUser(form.getFieldsValue(true)).then((res) => {
+        //             console.log('ddfda', res);
+        //             if (res) {
+        //                 showNotification("success", '', res.data?.message);
+        //                 setUserModel(false);
+        //                 setLoading(false);
+        //                 setErrors(userObj);
+        //                 loadList();
+        //             } else {
+        //                 setLoading(false);
+        //             }
+        //         })
+        //     }
+        // }
     }
     const actionFromTable = async (val) => {
         // setPagination(val);
@@ -236,7 +271,7 @@ function Crud() {
                 title={title}
                 open={userModel}
                 onOk={submitForm}
-                okText={userForm.id ? 'Update' : 'Create'}
+                okText={form.getFieldsValue(true).id ? 'Update' : 'Create'}
                 onCancel={() => setUserModel(false)}
                 centered
                 confirmLoading={loading}
@@ -245,7 +280,7 @@ function Crud() {
                     <Form
                         form={form}
                         layout="vertical"
-                        initialValues={userForm}
+                        initialValues={userObj}
                     >
                         <Row gutter={16}>
                             <Col span={12}>
@@ -255,6 +290,41 @@ function Crud() {
                                     rules={[{
                                         required: true,
                                         message: 'First name is required'
+                                    }]}>
+                                    <Input></Input>
+                                </Form.Item>
+                            </Col>
+                            <Col>
+                                <Form.Item
+                                    label="Last Name"
+                                    name="lastName"
+                                    rules={[{
+                                        required: true,
+                                        message: 'Last name is required'
+                                    }]}>
+                                    <Input></Input>
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    label="Email"
+                                    name="email"
+                                    rules={[{
+                                        required: true,
+                                        message: 'Email is required'
+                                    }]}>
+                                    <Input></Input>
+                                </Form.Item>
+                            </Col>
+                            <Col>
+                                <Form.Item
+                                    label="Phone number"
+                                    name="phoneNumber"
+                                    rules={[{
+                                        required: true,
+                                        message: 'Phone number is required'
                                     }]}>
                                     <Input></Input>
                                 </Form.Item>
