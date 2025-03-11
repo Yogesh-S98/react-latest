@@ -10,7 +10,7 @@ const FullScreenLoader = () => {
 
   return (
     <div className="fullscreen-loader">
-      <Spin tip="Loading..." size="large" />
+      <Spin size="large" />
     </div>
   );
 };

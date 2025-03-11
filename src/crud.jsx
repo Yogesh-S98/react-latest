@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Table from "./agGrid";
-import { Button, Modal, Spin } from "antd";
+import { Button, Modal, Spin, Form, Row, Col, Input } from "antd";
 import { EditOutlined, DeleteOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { Col, Form } from "react-bootstrap";
+// import { Col, Form } from "react-bootstrap";
 import { createUser, deleteUser, getList, updateUser } from "./service";
 import { useLoading } from "./loader";
 import { useNotification } from "./notification";
@@ -16,6 +16,7 @@ const userObj = {
 };
 
 function Crud() {
+    const [form] = Form.useForm();
     const { showNotification } = useNotification();
     const [modal, contextHolder] = Modal.useModal();
     const [data, setData] = useState([]);
@@ -97,6 +98,7 @@ function Crud() {
     };
     // Use useEffect to call loadList when the component mounts
     useEffect(() => {
+        form.setFieldsValue(userForm);
         loadList();
     }, []);
     
@@ -200,11 +202,10 @@ function Crud() {
                         setLoading(false);
                         setErrors(userObj);
                         loadList();
+                    } else {
+                        setLoading(false);
                     }
                 })
-                // .catch((error) => {
-                //     showNotification("error", '', error?.message);
-                // })
             }
         }
     }
@@ -241,7 +242,26 @@ function Crud() {
                 confirmLoading={loading}
                 >
                 <div>
-                    <Form>
+                    <Form
+                        form={form}
+                        layout="vertical"
+                        initialValues={userForm}
+                    >
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    label="First Name"
+                                    name="firstName"
+                                    rules={[{
+                                        required: true,
+                                        message: 'First name is required'
+                                    }]}>
+                                    <Input></Input>
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </Form>
+                    {/* <Form>
                         <Form.Group>
                             <div className="d-flex">
                                 <Col className="p-2">
@@ -302,7 +322,7 @@ function Crud() {
                                 </Col>
                             </div>
                         </Form.Group>
-                    </Form>
+                    </Form> */}
                 </div>
                 {/* <div className="d-flex justify-content-end">
                     <Button color="danger" variant="solid" style={{ marginRight: '10px' }} onClick={() => setUserModel(false)}>Cancel</Button>

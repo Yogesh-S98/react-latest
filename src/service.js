@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { useNotification } from './notification';
-import { message, notification } from 'antd';
+import { Button, notification, Result } from 'antd';
 
 export const data = async () => {
     const api = 'https://reqres.in/api/users?page=2';
