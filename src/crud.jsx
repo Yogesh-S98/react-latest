@@ -18,13 +18,14 @@ function Crud() {
         isAdmin: false
     };
     const [form] = Form.useForm();
+    const [isEdited, setIsEdited] = useState(false);
     const { showNotification } = useNotification();
     const [modal, contextHolder] = Modal.useModal();
     const [data, setData] = useState([]);
     const [userModel, setUserModel] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [userForm, setUserForm] = useState(userObj);
-    const [errors, setErrors] = useState(userObj);
+    // const [userForm, setUserForm] = useState(userObj);
+    // const [errors, setErrors] = useState(userObj);
     const [title, setTitle] = useState('');
     const { showLoading, hideLoading }= useLoading();
     const [pagination] = useState({
@@ -138,11 +139,13 @@ function Crud() {
     const handleEdit = async (row) => {
         console.log('row', row);
         setUserModel(true);
+        setIsEdited(false);
         setTitle('Update User');
         // await form.setFieldsValue(userObj);
+        await form.setFieldsValue(userObj);
         await form.setFieldsValue(row);
         console.log('ddd', form.getFieldsValue(true));
-        setErrors(userObj);
+        // setErrors(userObj);
     };
     
     const handleDelete = async (row) => {
@@ -152,17 +155,18 @@ function Crud() {
 
     const addUser = () => {
         setTitle('Create User');
+        setIsEdited(true);
         form.resetFields();
         // setErrors(userObj);
         // setUserForm(userObj);
         setUserModel(true);
     }
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setUserForm({ ...userForm, [name]: value });
-        setErrors({ ...errors, [name]: '' });
-    }
+    // const handleChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setUserForm({ ...userForm, [name]: value });
+    //     setErrors({ ...errors, [name]: '' });
+    // }
 
     const submitForm = async (e) => {
         e.preventDefault();
@@ -170,6 +174,7 @@ function Crud() {
             const values = await form.validateFields();
             console.log('valid', values);
             console.log('dddd', form.getFieldsValue(true))
+            setLoading(true);
             if (form.getFieldsValue(true).id) {
                 updateUser(form.getFieldsValue(true)).then((res) => {
                     console.log('dd', res);
@@ -178,7 +183,7 @@ function Crud() {
                         showNotification("success", '', res.data?.message);
                         setUserModel(false);
                         setLoading(false);
-                        setErrors(userObj);
+                        // setErrors(userObj);
                         loadList();
                     }
                 })
@@ -189,7 +194,7 @@ function Crud() {
                         showNotification("success", '', res.data?.message);
                         setUserModel(false);
                         setLoading(false);
-                        setErrors(userObj);
+                        // setErrors(userObj);
                         loadList();
                     } else {
                         setLoading(false);
@@ -199,53 +204,8 @@ function Crud() {
         } catch (error) {
             console.log('error', error);
         }
-        // const newErrors = {};
-        // if (!userForm.firstName) {
-        //     newErrors.firstName = 'First name is required';
-        // }
-        // if (!userForm.lastName) {
-        //     newErrors.lastName = 'Last name is required';
-        // }
-        // if (!userForm.phoneNumber) {
-        //     newErrors.phoneNumber = "Phone number is required";
-        // }
-        // if (!userForm.email) {
-        //     newErrors.email = 'Email is required';
-        // } else if (!/\S+@\S+\.\S+/.test(userForm.email)) {
-        //     newErrors.email = 'Email is invalid';
-        // }
-        // if (form.getFieldsError()) {
-        //     setLoading(true);
-        //     if (userForm.id) {
-        //         updateUser(form.getFieldsValue(true)).then((res) => {
-        //             console.log('dd', res);
-        //             if (res) {
-        //                 // successNotification(res?.data?.data?.message);
-        //                 showNotification("success", '', res.data?.message);
-        //                 setUserModel(false);
-        //                 setLoading(false);
-        //                 setErrors(userObj);
-        //                 loadList();
-        //             }
-        //         })
-        //     } else {
-        //         createUser(form.getFieldsValue(true)).then((res) => {
-        //             console.log('ddfda', res);
-        //             if (res) {
-        //                 showNotification("success", '', res.data?.message);
-        //                 setUserModel(false);
-        //                 setLoading(false);
-        //                 setErrors(userObj);
-        //                 loadList();
-        //             } else {
-        //                 setLoading(false);
-        //             }
-        //         })
-        //     }
-        // }
     }
     const actionFromTable = async (val) => {
-        // setPagination(val);
         pagination.current = val.current;
         pagination.pageSize = val.pageSize;
         loadList();
@@ -270,17 +230,17 @@ function Crud() {
             <Modal
                 title={title}
                 open={userModel}
-                onOk={submitForm}
                 okText={form.getFieldsValue(true).id ? 'Update' : 'Create'}
                 onCancel={() => setUserModel(false)}
                 centered
-                confirmLoading={loading}
+                footer={null}
                 >
                 <div>
                     <Form
                         form={form}
                         layout="vertical"
                         initialValues={userObj}
+                        onValuesChange={() => setIsEdited(true)}
                     >
                         <Row gutter={16}>
                             <Col span={12}>
@@ -331,73 +291,13 @@ function Crud() {
                             </Col>
                         </Row>
                     </Form>
-                    {/* <Form>
-                        <Form.Group>
-                            <div className="d-flex">
-                                <Col className="p-2">
-                                    <Form.Label>First Name</Form.Label>
-                                    <Form.Control
-                                        name="firstName"
-                                        value={userForm.firstName}
-                                        isInvalid={!!errors.firstName}
-                                        placeholder="Enter first name"
-                                        onChange={(e) => handleChange(e)}
-                                    ></Form.Control>
-                                    <Form.Control.Feedback type='invalid'>
-                                        {errors.firstName}
-                                    </Form.Control.Feedback>
-                                </Col>
-                                <Col className="p-2">
-                                    <Form.Label>Last Name</Form.Label>
-                                    <Form.Control
-                                        name="lastName"
-                                        value={userForm.lastName}
-                                        isInvalid={!!errors.lastName}
-                                        placeholder="Enter last name"
-                                        onChange={(e) => handleChange(e)}
-                                    ></Form.Control>
-                                    <Form.Control.Feedback type='invalid'>
-                                        {errors.lastName}
-                                    </Form.Control.Feedback>
-                                </Col>
-                            </div>
-                            <div className="d-flex">
-                                <Col className="p-2">
-                                    <Form.Label>Email</Form.Label>
-                                    <Form.Control
-                                        name="email"
-                                        type="email"
-                                        value={userForm.email}
-                                        isInvalid={!!errors.email}
-                                        placeholder="Enter email"
-                                        onChange={(e) => handleChange(e)}
-                                    ></Form.Control>
-                                    <Form.Control.Feedback type='invalid'>
-                                        {errors.email}
-                                    </Form.Control.Feedback>
-                                </Col>
-                                <Col className="p-2">
-                                    <Form.Label>Phone Number</Form.Label>
-                                    <Form.Control
-                                        name="phoneNumber"
-                                        type="number"
-                                        value={userForm.phoneNumber}
-                                        isInvalid={!!errors.phoneNumber}
-                                        placeholder="Enter phonenumber"
-                                        onChange={(e) => handleChange(e)}
-                                    ></Form.Control>
-                                    <Form.Control.Feedback type='invalid'>
-                                        {errors.phoneNumber}
-                                    </Form.Control.Feedback>
-                                </Col>
-                            </div>
-                        </Form.Group>
-                    </Form> */}
                 </div>
-                {/* <div className="d-flex justify-content-end">
+                <div className="d-flex justify-content-end">
                     <Button color="danger" variant="solid" style={{ marginRight: '10px' }} onClick={() => setUserModel(false)}>Cancel</Button>
-                    <Button color="primary" variant="solid" onClick={submitForm} type="submit">Submit</Button>
-                </div> */}
+                    <Button color="primary" disabled={!isEdited} loading={loading} variant="solid" onClick={submitForm} type="submit">
+                        {form.getFieldsValue(true).id ? 'Update' : 'Submit'}
+                    </Button>
+                </div>
             </Modal>
             {contextHolder}
         </div>

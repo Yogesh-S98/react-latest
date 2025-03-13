@@ -4,6 +4,7 @@ import './index.css';
 import '@ant-design/v5-patch-for-react-19';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from 'react-router-dom';
 
 
 // const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -13,9 +14,12 @@ import reportWebVitals from './reportWebVitals';
 //   </React.StrictMode>
 // );
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
+  <BrowserRouter>
+  {/* // <React.StrictMode> */}
+
+  {/* // </React.StrictMode> */}
   <App />
-  // </React.StrictMode>
+  </BrowserRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function
